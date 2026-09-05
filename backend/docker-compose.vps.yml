@@ -1,0 +1,21 @@
+name: cinemax
+
+services:
+  api:
+    build:
+      context: api/
+      target: runner
+    image: api:latest
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5002:5000"
+    networks:
+      - cinemax
+      - xservices_net
+
+networks:
+  cinemax:
+    driver: bridge
+  xservices_net:
+    external: true
