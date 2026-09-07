@@ -154,8 +154,12 @@ export function SessionsList({ sessions, lang }: SessionsListProps) {
 
                     {/* Room + Location */}
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-                      <MapPin className="h-3 w-3" />
-                      <span className="font-medium">{session.room.name}</span>
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="font-semibold text-foreground/80 truncate">
+                        {session.room.location.name}
+                      </span>
+                      <span className="text-muted-foreground/50">·</span>
+                      <span className="truncate">{session.room.name}</span>
                     </div>
 
                     {/* Badges row */}

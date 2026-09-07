@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -12,12 +11,9 @@ import {
   ExternalLink,
   Shuffle,
   Ticket,
-  X,
 } from "lucide-react";
-import { ApiSessionDetail, SessionSeat } from "@/lib/features/sessions";
+import { ApiSessionDetail } from "@/lib/features/sessions";
 import { SessionType } from "@/lib/features/movies";
-import { SessionRoomGallery, ROOM_GALLERY } from "./SessionRoomGallery";
-import { CheckoutModal } from "./CheckoutModal";
 import { formatPrice } from "@/lib/utils";
 import { useLocations } from "@/lib/features/locations/hooks/use-locations";
 
@@ -43,10 +39,6 @@ interface HeaderSessionProps {
 }
 
 export function HeaderSession({ session, lang }: HeaderSessionProps) {
-  const [isCheckoutOpen, setCheckoutOpen] = useState(false);
-  const [quickSeats, setQuickSeats] = useState<SessionSeat[]>([]);
-  const [randomSeatsBanner, setRandomSeatsBanner] = useState(false);
-
   const { data: locations = [] } = useLocations();
   const locationDetails = locations.find(l => l.id === session.room.location.id);
 
@@ -67,32 +59,21 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
   const formatBadgeClass =
     FORMAT_COLORS[session.room.format] || FORMAT_COLORS.D2;
 
-  // Pick a random available seat and open checkout
-  const handleQuickBuy = () => {
-    const available = session.seats.filter(s => s.status === "AVAILABLE");
-    if (available.length === 0) {
-      alert("Não existem lugares disponíveis para esta sessão.");
-      return;
-    }
-    const randomSeat = available[Math.floor(Math.random() * available.length)];
-    setQuickSeats([randomSeat]);
-    setRandomSeatsBanner(true);
-    setCheckoutOpen(true);
-  };
-
   return (
     <section className="relative w-full overflow-hidden bg-background">
-      {/* ── Backdrop com foto da sala ──────────────────────────── */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src={ROOM_GALLERY[0].src}
-          alt={`Sala ${session.room.name}`}
-          fill
-          priority
-          className="object-cover opacity-20 md:opacity-25 scale-105"
-          sizes="100vw"
-        />
-      </div>
+      {/* ── Backdrop com poster do filme ──────────────────────────── */}
+      {session.movie.posterUrl && (
+        <div className="absolute inset-0 z-0">
+          <Image
+            src={session.movie.posterUrl}
+            alt={`Poster de ${session.movie.title}`}
+            fill
+            priority
+            className="object-cover opacity-15 md:opacity-20 scale-110 blur-sm"
+            sizes="100vw"
+          />
+        </div>
+      )}
 
       {/* Gradientes */}
       <div className="absolute inset-0 z-0 bg-gradient-to-r from-background via-background/90 to-background/50" />
@@ -232,14 +213,14 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
               {/* Botões Principais */}
               {!isStarted && isSaleOpen && (
                 <div className="flex flex-wrap gap-3">
-                  {/* Quick Buy */}
-                  <button
-                    onClick={handleQuickBuy}
+                  {/* Comprar Bilhete → página de assentos */}
+                  <Link
+                    href={`/${lang}/sessions/${session.id}/seats`}
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-95"
                   >
                     <Ticket className="h-4 w-4" />
                     Comprar Bilhete
-                  </button>
+                  </Link>
 
                   {/* Choose Seats */}
                   <Link
@@ -270,25 +251,22 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
             </div>
           </div>
 
-          {/* Lado Direito: Galeria Preview da Sala */}
-          <SessionRoomGallery />
+          {/* Lado Direito: Poster do Filme */}
+          <div className="hidden md:block relative aspect-[2/3] w-full max-w-[280px] ml-auto rounded-2xl overflow-hidden shadow-2xl border border-border/40 group">
+            <Image
+              src={session.movie.posterUrl}
+              alt={`Poster de ${session.movie.title}`}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="280px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent opacity-60" />
+          </div>
         </div>
       </div>
 
       {/* Divisor */}
       <div className="absolute bottom-0 left-0 right-0 h-3 dot-divider opacity-20 z-20" />
-
-      {/* Info banner for random seat selection (shown inside modal) */}
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onOpenChange={(open) => {
-          setCheckoutOpen(open);
-          if (!open) setRandomSeatsBanner(false);
-        }}
-        session={session}
-        seats={quickSeats}
-        randomlyAssigned={randomSeatsBanner}
-      />
     </section>
   );
 }

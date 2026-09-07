@@ -10,6 +10,7 @@ export interface ApiMovie {
   language: string;
   synopsis: string;
   subtitleLanguage: string | null;
+  trailerUrl?: string | null;
   sessionMovies?: {
     id: string;
     type: string;

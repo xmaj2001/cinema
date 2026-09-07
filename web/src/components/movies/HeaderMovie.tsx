@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Clock,
   Play,
@@ -11,12 +11,11 @@ import {
   Tag,
   Bell,
 } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
 import { getMoviesFormat } from "@/components/movies/utiles";
 import { ApiMovieDetails, SessionType } from "@/lib/features/movies";
 import { NotifyMeModal } from "./NotifyMeModal";
+import { TrailerModal } from "./TrailerModal";
 
 interface HeaderMovieProps {
   movie: ApiMovieDetails;
@@ -25,6 +24,7 @@ interface HeaderMovieProps {
 
 export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
   const formats = useMemo(
     () => getMoviesFormat(movie.sessionMovies ?? []),
@@ -150,7 +150,7 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
               {movie.subtitleLanguage && (
                 <span className="text-muted-foreground/70">
                   {" "}
-                  (LEG: {movie.subtitleLanguage})
+                  (LEG: {movie.subtitleLanguage.toUpperCase() || "N/A"})
                 </span>
               )}
             </span>
@@ -214,12 +214,12 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
             )}
 
             {movie.trailerUrl && (
-              <Link
-                href={`/${lang}/movies/${movie.id}#trailer`}
+              <button
+                onClick={() => setIsTrailerOpen(true)}
                 className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/60 backdrop-blur-md px-6 py-2.5 text-xs sm:text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:bg-card hover:scale-[1.02] active:scale-95"
               >
                 <Play className="h-4 w-4 fill-foreground" /> Ver Trailer
-              </Link>
+              </button>
             )}
           </div>
         </div>
@@ -246,6 +246,15 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
           movieId={movie.id}
           movieTitle={movie.title}
           onClose={() => setIsNotifyModalOpen(false)}
+        />
+      )}
+
+      {/* Modal Trailer */}
+      {isTrailerOpen && movie.trailerUrl && (
+        <TrailerModal
+          trailerUrl={movie.trailerUrl}
+          movieTitle={movie.title}
+          onClose={() => setIsTrailerOpen(false)}
         />
       )}
     </section>

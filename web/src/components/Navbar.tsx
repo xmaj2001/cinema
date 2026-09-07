@@ -210,21 +210,11 @@ function NavbarContent() {
               {/* Menu Bar / Pipocas */}
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  href={`/${lang}/bar`}
+                  href={`#`}
                   className={`${navigationMenuTriggerStyle()} text-xs font-medium gap-1.5`}
                 >
                   <Popcorn className="h-3.5 w-3.5 text-amber-500" />
                   Bar & Pipocas
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-
-              {/* Área de Imersão */}
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  href={`/${lang}/immersion`}
-                  className={`${navigationMenuTriggerStyle()} text-xs font-medium gap-1.5`}
-                >
-                  Imersão 3D
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
