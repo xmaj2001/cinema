@@ -275,7 +275,7 @@ async function main() {
           subtitleLanguage: m.subtitleLanguage,
           cast: m.cast,
           director: m.director,
-          posterUrl: m.posterUrl,
+          posterUrl: m.posterUrl ?? "",
           bannerUrl: m.bannerUrl,
           trailerUrl: m.trailerUrl,
           durationMin: m.durationMin,
