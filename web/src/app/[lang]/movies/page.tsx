@@ -8,14 +8,13 @@ export async function generateMetadata({
   params,
 }: MoviesPageProps): Promise<Metadata> {
   const { lang } = await params;
+  const dict = getDictionary(lang);
   return {
-    title: "Filmes e Sessões - Cinemax Angola",
-    description:
-      "Consulta os filmes em cartaz, pré-venda e estreias nas salas Cinemax em Angola.",
+    title: dict.movies.page.title,
+    description: dict.movies.page.description,
     openGraph: {
-      title: "Filmes e Sessões - Cinemax Angola",
-      description:
-        "Consulta os filmes em cartaz, pré-venda e estreias nas salas Cinemax em Angola.",
+      title: dict.movies.page.title,
+      description: dict.movies.page.description,
     },
   };
 }
@@ -31,7 +30,7 @@ export default async function MoviesPage({
 }: MoviesPageProps) {
   const { lang } = await params;
   const resolvedSearchParams = await searchParams;
-  const dict = await getDictionary(lang);
+  const dict = getDictionary(lang);
 
   const search =
     typeof resolvedSearchParams?.search === "string"
@@ -99,15 +98,14 @@ export default async function MoviesPage({
             <div className="flex items-center gap-2 mb-2">
               <Film className="h-5 w-5 text-primary" />
               <span className="text-xs font-mono font-bold tracking-widest text-primary uppercase">
-                Cartaz & Estreias
+                {dict.movies.page.tag}
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-display font-extrabold text-foreground mt-1">
-              Programação de Cinema
+              {dict.movies.page.heading}
             </h1>
             <p className="text-muted-foreground text-sm mt-2 max-w-lg">
-              Escolhe o teu filme favorito, consulta as sessões disponíveis nas
-              salas Cinemax em Angola e garante os teus bilhetes.
+              {dict.movies.page.subtitle}
             </p>
           </div>
         </div>

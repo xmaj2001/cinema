@@ -21,15 +21,23 @@ import { TrailerModal } from "./TrailerModal";
 
 // Importando os dados e tipos fornecidos
 
+import { useParams } from "next/navigation";
+import { getDictionary } from "@/app/lib/dictionaries";
+
 interface HeroProps {
-  movies: ApiMovie[] | []
+  movies: ApiMovie[] | [];
+  lang?: string;
 }
 
 interface HeroItemProps {
   movie: ApiMovie;
+  lang?: string;
 }
 
-function HeroItem({ movie }: HeroItemProps) {
+function HeroItem({ movie, lang: propLang }: HeroItemProps) {
+  const params = useParams();
+  const lang = propLang || (params?.lang as string) || "pt";
+  const dict = getDictionary(lang);
   const formats = getMoviesFormat(movie.sessionMovies ?? []);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
@@ -64,7 +72,7 @@ function HeroItem({ movie }: HeroItemProps) {
               />
               {/* Estado dinâmico (Pré-venda / Em Cartaz) */}
               <span className="font-mono text-primary font-bold">
-                {movie.status || "Em Destaque"}
+                {movie.status || dict.movies.hero.featured}
               </span>
               <span
                 className="dotted-x flex-1 max-w-16 text-foreground/50"
@@ -117,10 +125,10 @@ function HeroItem({ movie }: HeroItemProps) {
             {/* Botões de Ação */}
             <div className="flex flex-wrap gap-4 pt-4">
               <Link
-                href={`/movies/${movie.id}#cinemas`}
+                href={`/${lang}/movies/${movie.id}#cinemas`}
                 className="inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-3.5 text-sm md:text-base font-bold text-primary-foreground shadow-lg transition hover:bg-primary/90 transform hover:-translate-y-0.5"
               >
-                <Ticket className="h-5 w-5" /> Comprar Bilhete
+                <Ticket className="h-5 w-5" /> {dict.movies.hero.buy_ticket}
               </Link>
 
               {movie.trailerUrl ? (
@@ -128,14 +136,14 @@ function HeroItem({ movie }: HeroItemProps) {
                   onClick={() => setIsTrailerOpen(true)}
                   className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card/50 backdrop-blur-sm px-8 py-3.5 text-sm md:text-base font-bold text-foreground transition hover:border-foreground/50 hover:bg-card"
                 >
-                  <Play className="h-5 w-5 fill-foreground" /> Ver Trailer
+                  <Play className="h-5 w-5 fill-foreground" /> {dict.movies.hero.watch_trailer}
                 </button>
               ) : (
                 <Link
-                  href={`/movies/${movie.id}`}
+                  href={`/${lang}/movies/${movie.id}`}
                   className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card/50 backdrop-blur-sm px-8 py-3.5 text-sm md:text-base font-bold text-foreground transition hover:border-foreground/50 hover:bg-card"
                 >
-                  <Play className="h-5 w-5 fill-foreground" /> Ver Detalhes
+                  <Play className="h-5 w-5 fill-foreground" /> {dict.movies.hero.view_details}
                 </Link>
               )}
             </div>
@@ -156,7 +164,7 @@ function HeroItem({ movie }: HeroItemProps) {
                 {movie.language?.toUpperCase() || "N/A"}
               </span>
               <span className="text-xs font-medium border border-white/40 bg-black/40 px-2 py-1 rounded backdrop-blur-sm">
-                LEG: {movie.subtitleLanguage?.toUpperCase() || "N/A"}
+                {dict.movies.hero.subtitle_lang}: {movie.subtitleLanguage?.toUpperCase() || "N/A"}
               </span>
             </div>
           </div>
@@ -177,7 +185,7 @@ function HeroItem({ movie }: HeroItemProps) {
   );
 }
 
-export function Hero({ movies }: HeroProps) {
+export function Hero({ movies, lang }: HeroProps) {
   if (movies.length === 0) {
     return null;
   }
@@ -198,7 +206,7 @@ export function Hero({ movies }: HeroProps) {
       >
         <CarouselContent className="ml-0">
           {featuredMovies.map((movie) => (
-            <HeroItem key={movie.id} movie={movie} />
+            <HeroItem key={movie.id} movie={movie} lang={lang} />
           ))}
         </CarouselContent>
       </Carousel>

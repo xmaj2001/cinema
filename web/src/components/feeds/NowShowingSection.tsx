@@ -11,6 +11,8 @@ import {
 import { ApiMovie } from "@/lib/features/movies";
 import { MovieCard } from "../movies/MovieCard";
 
+import { getDictionary } from "@/app/lib/dictionaries";
+
 interface NowShowingSectionProps {
   lang?: string;
   movies: ApiMovie[];
@@ -20,7 +22,7 @@ export function NowShowingSection({
   lang = "pt",
   movies,
 }: NowShowingSectionProps) {
-  // TODO: Essa falta por no dicionario
+  const dict = getDictionary(lang);
 
   return (
     <section className="">
@@ -29,14 +31,14 @@ export function NowShowingSection({
         <div className="flex items-center gap-3">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">
-            Em Cartaz
+            {dict.feeds.now_showing}
           </h2>
         </div>
         <Link
           href={`/${lang}/movies?status=now-showing`}
           className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
         >
-          Ver Todos
+          {dict.feeds.view_all}
         </Link>
       </div>
 

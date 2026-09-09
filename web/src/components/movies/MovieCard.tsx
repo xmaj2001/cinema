@@ -6,23 +6,27 @@ import Link from "next/link";
 import { getMoviesFormat } from "./utiles";
 import { ApiMovie } from "@/lib/features/movies";
 
+import { getDictionary } from "@/app/lib/dictionaries";
+
 interface MovieCardProps {
   movie: ApiMovie;
   lang?: string;
   branchId?: string;
 }
 
-const DAY_NAMES_PT: Record<number, string> = {
-  0: "Dom",
-  1: "Seg",
-  2: "Ter",
-  3: "Qua",
-  4: "Qui",
-  5: "Sex",
-  6: "Sáb",
-};
-
 export function MovieCard({ movie, lang = "pt", branchId }: MovieCardProps) {
+  const dict = getDictionary(lang);
+
+  const dayNamesShort: Record<number, string> = {
+    0: dict.days.sun_short,
+    1: dict.days.mon_short,
+    2: dict.days.tue_short,
+    3: dict.days.wed_short,
+    4: dict.days.thu_short,
+    5: dict.days.fri_short,
+    6: dict.days.sat_short,
+  };
+
   const sessions = (movie.sessionMovies ?? []).filter(
     (st) => !branchId || st.room.locationId === branchId,
   );
@@ -35,8 +39,8 @@ export function MovieCard({ movie, lang = "pt", branchId }: MovieCardProps) {
   for (const st of sessions) {
     if (sessionEntries.length >= 4) break;
     const date = new Date(st.startTime);
-    const dayName = DAY_NAMES_PT[date.getDay()];
-    const time = date.toLocaleTimeString("pt-PT", {
+    const dayName = dayNamesShort[date.getDay()];
+    const time = date.toLocaleTimeString(lang === "en" ? "en-US" : "pt-PT", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -89,7 +93,7 @@ export function MovieCard({ movie, lang = "pt", branchId }: MovieCardProps) {
           {isPreEstreia && (
             <div className="absolute top-2 right-2 z-10">
               <span className="rounded-sm bg-amber-500/90 px-2 py-0.5 text-[9px] font-mono font-bold text-black uppercase tracking-wider backdrop-blur-xs">
-                Pré-Estreia
+                {dict.movies.card.pre_premiere}
               </span>
             </div>
           )}
@@ -118,7 +122,7 @@ export function MovieCard({ movie, lang = "pt", branchId }: MovieCardProps) {
                   ? "border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-black hover:border-amber-500"
                   : "border-border/80 bg-secondary/60 text-secondary-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
               }`}
-              title="Clique para selecionar este horário e escolher assentos"
+              title={dict.movies.card.click_to_select}
             >
               {entry.label}
             </Link>

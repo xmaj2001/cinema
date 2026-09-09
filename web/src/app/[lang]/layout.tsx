@@ -69,6 +69,7 @@ export default async function RootLayout({
   params,
 }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
+  const dict = getDictionary(lang);
   return (
     <html
       lang={lang}
@@ -79,14 +80,14 @@ export default async function RootLayout({
         <QueryProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >
             <div className="min-h-screen bg-background pb-16 lg:pb-0">
               <Navbar />
               {children}
-              <Footer />
+              <Footer dict={dict} />
             </div>
           </ThemeProvider>
         </QueryProvider>

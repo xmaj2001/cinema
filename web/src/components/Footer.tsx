@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Ticket, Film, MapPin, PhoneCall } from "lucide-react";
 
+import { useParams } from "next/navigation";
+import { getDictionary } from "@/app/lib/dictionaries";
+
 /* Ícones de redes sociais */
 function IconInstagram({ className }: { className?: string }) {
   return (
@@ -54,75 +57,56 @@ function IconYoutube({ className }: { className?: string }) {
   );
 }
 
-const columns = [
-  {
-    title: "Programação",
-    links: [
-      { label: "Em Cartaz", href: "/pt/filmes?status=em-cartaz" },
-      { label: "Em Breve & Pré-Venda", href: "/pt/filmes?status=brevemente" },
-      { label: "Salas VIP", href: "/pt/experiencias" },
-      { label: "Experiência 3D", href: "/pt/experiencias" },
-    ],
-  },
-  {
-    title: "Cinemas em Angola",
-    links: [
-      { label: "Talatona (Luanda)", href: "/pt/cinemas/talatona" },
-      { label: "Kilamba (Luanda)", href: "/pt/cinemas/kilamba" },
-      { label: "Nova Vida (Luanda)", href: "/pt/cinemas/nova-vida" },
-      { label: "Benguela", href: "/pt/cinemas/benguela" },
-      { label: "Lubango", href: "/pt/cinemas/lubango" },
-      { label: "Huambo", href: "/pt/cinemas/huambo" },
-    ],
-  },
-  {
-    title: "Apoio & Informações",
-    links: [
-      { label: "Perguntas Frequentes", href: "#" },
-      { label: "Termos & Condições", href: "#" },
-      { label: "Política de Privacidade", href: "#" },
-      { label: "Regulamento do Cinema", href: "#" },
-      { label: "Contacte-nos", href: "#" },
-    ],
-  },
-];
-
 interface FooterProps {
   dict?: any;
 }
 
-export function Footer({ dict }: FooterProps) {
-  const bio =
-    dict?.about?.short_bio ||
-    "A maior rede de cinemas em Angola. Assista às melhores estreias globais e cinema nacional com a melhor tecnologia de som e projeção.";
+export function Footer({ dict: propDict }: FooterProps) {
+  const params = useParams();
+  const lang = (params?.lang as string) || "pt";
+  const dict = propDict || getDictionary(lang);
+  const footerDict = dict.footer || getDictionary(lang).footer;
+
+  const columns = [
+    {
+      title: footerDict.programming,
+      links: [
+        { label: footerDict.now_showing, href: `/${lang}/movies?status=em-cartaz` },
+        { label: footerDict.coming_soon, href: `/${lang}/movies?status=brevemente` },
+        { label: footerDict.vip_rooms, href: `/${lang}/experiencias` },
+        { label: footerDict.experience_3d, href: `/${lang}/experiencias` },
+      ],
+    },
+    {
+      title: footerDict.cinemas_angola,
+      links: [
+        { label: "Talatona (Luanda)", href: `/${lang}/cinemas/talatona` },
+        { label: "Kilamba (Luanda)", href: `/${lang}/cinemas/kilamba` },
+        { label: "Nova Vida (Luanda)", href: `/${lang}/cinemas/nova-vida` },
+        { label: "Benguela", href: `/${lang}/cinemas/benguela` },
+        { label: "Lubango", href: `/${lang}/cinemas/lubango` },
+        { label: "Huambo", href: `/${lang}/cinemas/huambo` },
+      ],
+    },
+    {
+      title: footerDict.support_info,
+      links: [
+        { label: footerDict.faq, href: "#" },
+        { label: footerDict.terms, href: "#" },
+        { label: footerDict.privacy, href: "#" },
+        { label: footerDict.rules, href: "#" },
+        { label: footerDict.contact, href: "#" },
+      ],
+    },
+  ];
+
+  const bio = dict?.about?.short_bio || footerDict.bio;
 
   return (
     <footer className="px-2 pb-2 sm:px-3 pt-8">
-      {/* Container relativo para suportar o contorno SVG por cima */}
-      <div className="relative rounded-3xl bg-background px-6 py-12 shadow-2xl sm:px-12 overflow-hidden  border border-neutral-100/10">
-        {/* --- LINHA PONTILHADA ANIMADA SÓ NO TOPO --- */}
-        {/* <div className="absolute top-0 left-0 right-0 h-[2px] overflow-hidden">
-          <svg
-            className="w-full h-full stroke-primary/70"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <line
-              x1="0"
-              y1="1"
-              x2="100%"
-              y2="1"
-              strokeWidth="2"
-              strokeDasharray="4 8"
-              strokeLinecap="round"
-              className="animate-[dash-rotate_15s_linear_infinite]"
-            />
-          </svg>
-        </div> */}
-
+      <div className="relative rounded-3xl bg-background px-6 py-12 shadow-2xl sm:px-12 overflow-hidden border border-neutral-100/10">
         <div className="mx-auto max-w-7xl relative z-10">
-          {/* Top: Logo + Bio + Redes Sociais */}
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-            {/* Coluna da Marca */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <Image
@@ -140,18 +124,16 @@ export function Footer({ dict }: FooterProps) {
                 {bio}
               </p>
 
-              {/* Contacto Rápido */}
               <div className="mt-1 flex flex-col gap-2">
                 <a
                   href="tel:+244923000000"
                   className="inline-flex w-fit items-center gap-2 rounded-full border border-neutral-800 bg-neutral-900 px-3.5 py-1.5 text-xs font-semibold text-neutral-300 transition hover:bg-neutral-800 hover:text-white"
                 >
                   <PhoneCall className="h-3.5 w-3.5 text-primary" />
-                  Apoio ao Cliente (+244)
+                  {footerDict.customer_support}
                 </a>
               </div>
 
-              {/* Redes Sociais */}
               <div className="flex items-center gap-2.5 mt-2">
                 {[
                   {
@@ -184,7 +166,6 @@ export function Footer({ dict }: FooterProps) {
               </div>
             </div>
 
-            {/* Colunas de Links */}
             {columns.map((col) => (
               <div key={col.title}>
                 <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-primary font-mono">
@@ -206,15 +187,13 @@ export function Footer({ dict }: FooterProps) {
             ))}
           </div>
 
-          {/* Rodapé inferior / Direitos */}
           <div className="mt-12 border-t border-neutral-800/80 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[11px] text-neutral-500 font-mono">
-              © {new Date().getFullYear()} CINEMA Angola — Todos os direitos
-              reservados.
+              © {new Date().getFullYear()} {footerDict.rights}
             </p>
 
             <div className="flex items-center gap-4 text-[11px] text-neutral-500 font-mono">
-              <span>Sinta a Magia do Cinema</span>
+              <span>{footerDict.slogan}</span>
             </div>
           </div>
         </div>

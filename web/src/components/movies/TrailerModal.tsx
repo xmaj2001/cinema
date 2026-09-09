@@ -2,18 +2,20 @@
 
 import { useEffect, useCallback } from "react";
 import { X } from "lucide-react";
+import { useParams } from "next/navigation";
+import { getDictionary } from "@/app/lib/dictionaries";
 
 interface TrailerModalProps {
   trailerUrl: string;
   movieTitle: string;
   onClose: () => void;
+  lang?: string;
 }
 
 function getYouTubeEmbedUrl(url: string): string | null {
   try {
     const parsed = new URL(url);
 
-    // Formato: https://www.youtube.com/watch?v=VIDEO_ID
     if (
       parsed.hostname.includes("youtube.com") &&
       parsed.pathname === "/watch"
@@ -24,7 +26,6 @@ function getYouTubeEmbedUrl(url: string): string | null {
       }
     }
 
-    // Formato: https://youtu.be/VIDEO_ID
     if (parsed.hostname === "youtu.be") {
       const videoId = parsed.pathname.slice(1);
       if (videoId) {
@@ -32,7 +33,6 @@ function getYouTubeEmbedUrl(url: string): string | null {
       }
     }
 
-    // Formato já embed: https://www.youtube.com/embed/VIDEO_ID
     if (
       parsed.hostname.includes("youtube.com") &&
       parsed.pathname.startsWith("/embed/")
@@ -50,7 +50,11 @@ export function TrailerModal({
   trailerUrl,
   movieTitle,
   onClose,
+  lang: propLang,
 }: TrailerModalProps) {
+  const params = useParams();
+  const lang = propLang || (params?.lang as string) || "pt";
+  const dict = getDictionary(lang);
   const embedUrl = getYouTubeEmbedUrl(trailerUrl);
 
   const handleKeyDown = useCallback(
@@ -75,7 +79,7 @@ export function TrailerModal({
       onClick={onClose}
       aria-modal="true"
       role="dialog"
-      aria-label={`Trailer de ${movieTitle}`}
+      aria-label={`${dict.movies.trailer_modal.title} - ${movieTitle}`}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" />
@@ -88,12 +92,12 @@ export function TrailerModal({
         {/* Header */}
         <div className="flex items-center justify-between mb-3 px-1">
           <p className="text-sm font-mono text-white/70 truncate">
-            Trailer — <span className="text-white font-semibold">{movieTitle}</span>
+            {dict.movies.trailer_modal.title} — <span className="text-white font-semibold">{movieTitle}</span>
           </p>
           <button
             onClick={onClose}
             className="flex items-center justify-center h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-            aria-label="Fechar trailer"
+            aria-label={dict.movies.trailer_modal.close}
           >
             <X className="h-4 w-4" />
           </button>
@@ -113,7 +117,7 @@ export function TrailerModal({
             /* Fallback se o URL não for do YouTube */
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white/60">
               <p className="text-sm font-mono">
-                Não foi possível carregar o trailer aqui.
+                {dict.movies.trailer_modal.error_message}
               </p>
               <a
                 href={trailerUrl}
@@ -121,7 +125,7 @@ export function TrailerModal({
                 rel="noopener noreferrer"
                 className="text-sm text-primary underline underline-offset-4"
               >
-                Ver no site original →
+                {dict.movies.trailer_modal.watch_original}
               </a>
             </div>
           )}

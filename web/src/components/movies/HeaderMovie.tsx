@@ -17,12 +17,15 @@ import { ApiMovieDetails, SessionType } from "@/lib/features/movies";
 import { NotifyMeModal } from "./NotifyMeModal";
 import { TrailerModal } from "./TrailerModal";
 
+import { getDictionary } from "@/app/lib/dictionaries";
+
 interface HeaderMovieProps {
   movie: ApiMovieDetails;
   lang: string;
 }
 
 export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
+  const dict = getDictionary(lang);
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
@@ -48,7 +51,7 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
 
     if (hasPreEstreia) {
       return {
-        label: "Pré-Estreia Especial",
+        label: dict.movies.header.pre_premiere_special,
         badgeClass: "bg-amber-500/20 text-amber-400 border-amber-500/30",
         icon: Sparkles,
       };
@@ -56,7 +59,7 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
 
     if (hasPresaleSessions) {
       return {
-        label: "Pré-Venda Aberta",
+        label: dict.movies.header.presale_open,
         badgeClass: "bg-purple-500/20 text-purple-400 border-purple-500/30",
         icon: Flame,
       };
@@ -64,18 +67,18 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
 
     if (hasStartedSessions) {
       return {
-        label: "Em Cartaz",
+        label: dict.movies.header.now_showing,
         badgeClass: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
         icon: Tag,
       };
     }
 
     return {
-      label: "Em Breve nos Cinemas",
+      label: dict.movies.header.coming_soon_cinemas,
       badgeClass: "bg-blue-500/20 text-blue-400 border-blue-500/30",
       icon: Calendar,
     };
-  }, [movie]);
+  }, [movie, dict]);
 
   const StateIcon = movieState.icon;
 
@@ -150,7 +153,7 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
               {movie.subtitleLanguage && (
                 <span className="text-muted-foreground/70">
                   {" "}
-                  (LEG: {movie.subtitleLanguage.toUpperCase() || "N/A"})
+                  ({dict.movies.header.subtitles}: {movie.subtitleLanguage.toUpperCase() || "N/A"})
                 </span>
               )}
             </span>
@@ -178,8 +181,8 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
             {movie.releaseDate && (
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 text-foreground/60" />
-                Estreia:{" "}
-                {new Date(movie.releaseDate).toLocaleDateString("pt-PT", {
+                {dict.movies.header.premiere_date}:{" "}
+                {new Date(movie.releaseDate).toLocaleDateString(lang === "en" ? "en-US" : "pt-PT", {
                   day: "numeric",
                   month: "short",
                   year: "numeric",
@@ -190,7 +193,7 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
             {movie.director && (
               <span className="flex items-center gap-1.5">
                 <Star className="h-3.5 w-3.5 text-foreground/60" />
-                Direção: {movie.director}
+                {dict.movies.header.director}: {movie.director}
               </span>
             )}
           </div>
@@ -204,12 +207,12 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
 
           {/* Ações / Apenas Trailer (Sem botão de compra) */}
           <div className="flex items-center gap-4 pt-2">
-            {movieState.label === "Em Breve nos Cinemas" && (
+            {movieState.label === dict.movies.header.coming_soon_cinemas && (
               <button
                 onClick={() => setIsNotifyModalOpen(true)}
                 className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-xs sm:text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:brightness-110 hover:scale-[1.02] active:scale-95"
               >
-                <Bell className="h-4 w-4" /> Avisar-me
+                <Bell className="h-4 w-4" /> {dict.movies.header.notify_me}
               </button>
             )}
 
@@ -218,7 +221,7 @@ export function HeaderMovie({ movie, lang }: HeaderMovieProps) {
                 onClick={() => setIsTrailerOpen(true)}
                 className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/60 backdrop-blur-md px-6 py-2.5 text-xs sm:text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:bg-card hover:scale-[1.02] active:scale-95"
               >
-                <Play className="h-4 w-4 fill-foreground" /> Ver Trailer
+                <Play className="h-4 w-4 fill-foreground" /> {dict.movies.header.watch_trailer}
               </button>
             )}
           </div>

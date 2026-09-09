@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { ModeToggle } from "./ModeToggle";
 import { LanguageToggle } from "./LanguageToggle";
+import { getDictionary } from "@/app/lib/dictionaries";
 
 function NavbarContent() {
   const router = useRouter();
@@ -42,6 +43,7 @@ function NavbarContent() {
   const params = useParams();
   const pathname = usePathname();
   const lang = (params?.lang as string) || "pt";
+  const dict = getDictionary(lang);
   const [, startTransition] = useTransition();
 
   const [isScrolled, setIsScrolled] = useState(false);
@@ -90,7 +92,7 @@ function NavbarContent() {
           <button
             onClick={() => setMenuOpen(true)}
             className="lg:hidden p-2 -ml-2 text-foreground hover:bg-muted rounded-full transition-colors"
-            aria-label="Abrir Menu"
+            aria-label={dict.nav.open_menu}
           >
             <Menu className="h-6 w-6" />
           </button>
@@ -121,7 +123,7 @@ function NavbarContent() {
               autoComplete="off"
               value={searchVal}
               onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Pesquisar filmes, atores, salas..."
+              placeholder={dict.nav.search_placeholder}
               className="h-9 w-full rounded-full border border-border bg-background/60 pl-9 pr-4 text-xs outline-none focus:border-primary focus:bg-background transition-all"
             />
           </div>
@@ -134,7 +136,7 @@ function NavbarContent() {
               {/* Menu Filmes & Programação */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="text-xs font-medium">
-                  Programação
+                  {dict.nav.programming}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-3 p-4 md:w-[420px] lg:w-[520px] lg:grid-cols-[.9fr_1fr]">
@@ -144,35 +146,34 @@ function NavbarContent() {
                         className="flex h-full w-full flex-col justify-end rounded-md p-6 no-underline outline-none focus:shadow-md transition-all select-none cursor-pointer bg-gradient-to-br from-primary/90 to-primary text-primary-foreground hover:opacity-95"
                       >
                         <Film className="h-8 w-8 mb-2" />
-                        <div className="text-base font-bold">Filmes</div>
+                        <div className="text-base font-bold">{dict.nav.movies}</div>
                         <p className="text-xs leading-relaxed opacity-90 mt-1">
-                          Consulte os horários atualizados e garanta os melhores
-                          lugares nas nossas salas.
+                          {dict.nav.movies_desc}
                         </p>
                       </NavigationMenuLink>
                     </li>
                     <ListItem
                       href={`/${lang}/movies?status=em-cartaz`}
-                      title="Em Cartaz"
+                      title={dict.nav.now_showing}
                       icon={<Film className="h-3.5 w-3.5 text-emerald-500" />}
                     >
-                      Filmes em exibição hoje nas nossas salas.
+                      {dict.nav.now_showing_desc}
                     </ListItem>
                     <ListItem
                       href={`/${lang}/movies?status=brevemente`}
-                      title="Em Breve & Pré-Venda"
+                      title={dict.nav.coming_soon}
                       icon={
                         <CalendarDays className="h-3.5 w-3.5 text-amber-500" />
                       }
                     >
-                      As próximas estreias e pré-vendas exclusivas.
+                      {dict.nav.coming_soon_desc}
                     </ListItem>
                     <ListItem
                       href={`/${lang}/experiencias`}
-                      title="Salas VIP & 3D"
+                      title={dict.nav.vip}
                       icon={<Sparkles className="h-3.5 w-3.5 text-primary" />}
                     >
-                      Descubra o conforto e luxo das salas VIP.
+                      {dict.nav.vip_desc}
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
@@ -181,29 +182,10 @@ function NavbarContent() {
               {/* Menu Cinemas / Localizações */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="text-xs font-medium">
-                  Cinemas
+                  {dict.nav.cinemas}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  {/* <ul className="grid w-[520px] gap-2 p-4 md:grid-cols-2 lg:w-[600px]">
-                    {locations.map((b) => (
-                      <ListItem
-                        key={b.id}
-                        href={`/${lang}/cinemas/${b.id}`}
-                        title={b.name}
-                        icon={<MapPin className="h-3.5 w-3.5 text-primary" />}
-                        className={
-                          currentBranch === b.id
-                            ? "bg-accent/60 border-l-2 border-primary"
-                            : ""
-                        }
-                      >
-                        <span className="block font-semibold text-[11px] text-foreground/80 mb-0.5">
-                          {b.address || `${b.city}, ${b.province}`}
-                        </span>
-                        {b.phone ? `Telf: ${b.phone}` : "O seu cinema de eleição."}
-                      </ListItem>
-                    ))}
-                  </ul> */}
+                  {/* ... */}
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
@@ -214,7 +196,7 @@ function NavbarContent() {
                   className={`${navigationMenuTriggerStyle()} text-xs font-medium gap-1.5`}
                 >
                   <Popcorn className="h-3.5 w-3.5 text-amber-500" />
-                  Bar & Pipocas
+                  {dict.nav.bar}
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -230,7 +212,7 @@ function NavbarContent() {
           <button
             onClick={() => setSearchOpen(true)}
             className="md:hidden flex items-center justify-center p-2 rounded-full hover:bg-muted text-foreground transition-colors"
-            aria-label="Pesquisar"
+            aria-label={dict.nav.search_title}
           >
             <Search className="h-[1.1rem] w-[1.1rem]" />
           </button>
@@ -253,7 +235,7 @@ function NavbarContent() {
         }`}
       >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-lg text-foreground">Pesquisar</h3>
+          <h3 className="font-bold text-lg text-foreground">{dict.nav.search_title}</h3>
           <button
             onClick={() => setSearchOpen(false)}
             className="p-2 bg-muted hover:bg-muted/80 rounded-full transition-colors text-foreground"
@@ -270,7 +252,7 @@ function NavbarContent() {
             autoComplete="off"
             value={searchVal}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Pesquisar filmes..."
+            placeholder={dict.nav.search_placeholder_mobile}
             className="h-12 w-full rounded-xl border border-border bg-background/60 pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm"
           />
         </div>
@@ -317,7 +299,7 @@ function NavbarContent() {
         <nav className="flex flex-col gap-6">
           <section>
             <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-              <Film className="h-4 w-4" /> Programação
+              <Film className="h-4 w-4" /> {dict.nav.programming}
             </h4>
             <ul className="space-y-1">
               <li>
@@ -326,7 +308,7 @@ function NavbarContent() {
                   onClick={() => setMenuOpen(false)}
                   className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                 >
-                  Cartaz da Semana
+                  {dict.nav.week_schedule}
                 </Link>
               </li>
               <li>
@@ -335,7 +317,7 @@ function NavbarContent() {
                   onClick={() => setMenuOpen(false)}
                   className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                 >
-                  Em Cartaz
+                  {dict.nav.now_showing}
                 </Link>
               </li>
               <li>
@@ -344,7 +326,7 @@ function NavbarContent() {
                   onClick={() => setMenuOpen(false)}
                   className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                 >
-                  Em Breve & Pré-Venda
+                  {dict.nav.coming_soon}
                 </Link>
               </li>
             </ul>
@@ -352,21 +334,8 @@ function NavbarContent() {
 
           <section className="border-t pt-5 border-border/50">
             <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-              <MapPin className="h-4 w-4" /> Cinemas
+              <MapPin className="h-4 w-4" /> {dict.nav.cinemas}
             </h4>
-            {/* <ul className="space-y-1">
-              {locations.map((b) => (
-                <li key={b.id}>
-                  <Link
-                    href={`/${lang}/cinemas/${b.id}`}
-                    onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-colors"
-                  >
-                    {b.name}
-                  </Link>
-                </li>
-              ))}
-            </ul> */}
           </section>
 
           <section className="border-t pt-5 border-border/50">
@@ -378,7 +347,7 @@ function NavbarContent() {
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                 >
                   <Popcorn className="h-4 w-4 text-amber-500" />
-                  Bar & Pipocas
+                  {dict.nav.bar}
                 </Link>
               </li>
               <li>
@@ -387,7 +356,7 @@ function NavbarContent() {
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                 >
-                  Salas VIP & Experiências
+                  {dict.nav.vip_experiences}
                 </Link>
               </li>
             </ul>

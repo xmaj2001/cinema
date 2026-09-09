@@ -7,12 +7,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckoutModal } from "./CheckoutModal";
 import { formatPrice } from "@/lib/utils";
 
+import { useParams } from "next/navigation";
+import { getDictionary } from "@/app/lib/dictionaries";
+
 interface SeatMapProps {
   session: ApiSessionDetail;
   onConfirm?: (selectedSeats: SessionSeat[]) => void;
+  lang?: string;
 }
 
-export function SeatMap({ session, onConfirm }: SeatMapProps) {
+export function SeatMap({ session, onConfirm, lang: propLang }: SeatMapProps) {
+  const params = useParams();
+  const lang = propLang || (params?.lang as string) || "pt";
+  const dict = getDictionary(lang);
+
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [ticketQuantity, setTicketQuantity] = useState<number>(1);
   const [isCheckoutOpen, setCheckoutOpen] = useState(false);
@@ -40,8 +48,6 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
     if (newSelected.has(seat.id)) {
       newSelected.delete(seat.id);
     } else {
-      // UX Improvement: Se exceder a quantidade, remove o primeiro lugar selecionado (FIFO) 
-      // ou reseta se for quantidade = 1
       if (ticketQuantity === 1) {
         newSelected.clear();
         newSelected.add(seat.id);
@@ -96,7 +102,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
         <div className="relative z-30 bg-amber-500/10 border-b border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs px-4 py-1.5 flex items-center justify-center gap-2 font-medium text-center">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
           <span>
-            <strong>Modo Demonstração (MVP):</strong> O sistema de pagamento real está indisponível. A compra será apenas uma simulação.
+            <strong>{dict.sessions.seat_map.mvp_warning_title}</strong> {dict.sessions.seat_map.mvp_warning_desc}
           </span>
         </div>
 
@@ -109,7 +115,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
             <span className="flex items-center justify-center w-7 h-7 rounded-full bg-card border border-border group-hover:border-foreground/30 transition-colors">
               <ChevronLeft className="w-4 h-4" />
             </span>
-            <span className="hidden sm:inline">Voltar</span>
+            <span className="hidden sm:inline">{dict.sessions.seat_map.back}</span>
           </button>
 
           <div className="flex flex-col items-center text-center">
@@ -118,7 +124,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
             </span>
             <span className="text-[11px] text-muted-foreground">
               {session.room.name} &middot;{" "}
-              {new Date(session.startTime).toLocaleTimeString("pt-PT", {
+              {new Date(session.startTime).toLocaleTimeString(lang === "en" ? "en-US" : "pt-PT", {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
@@ -128,7 +134,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono text-muted-foreground bg-card border border-border/80 px-2.5 py-1 rounded-full hidden sm:flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-              {session.seats.filter(s => s.status === "AVAILABLE").length} livres
+              {session.seats.filter(s => s.status === "AVAILABLE").length} {dict.sessions.seat_map.seats_free}
             </span>
           </div>
         </div>
@@ -153,7 +159,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
             <div className="text-center mb-10 pointer-events-none">
               <div className="w-72 sm:w-[420px] mx-auto h-2.5 bg-gradient-to-b from-primary/80 via-primary/30 to-transparent rounded-t-[100%] shadow-[0_10px_35px_rgba(var(--primary),0.4)]" />
               <span className="text-[9px] font-mono tracking-[0.4em] uppercase text-muted-foreground/60 mt-2 block">
-                ECRÃ / TELA
+                {dict.sessions.seat_map.screen}
               </span>
             </div>
 
@@ -203,12 +209,12 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
         {/* ── LEGEND & HELPER (Floating) ── */}
         <div className="absolute z-10 right-4 top-[105px] pointer-events-none flex flex-col gap-2">
           <div className="hidden md:flex flex-col gap-1.5 bg-card/90 backdrop-blur-md border border-border/60 rounded-xl px-3 py-2.5 shadow-lg pointer-events-auto">
-            <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground/60 mb-1">Legenda</p>
+            <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground/60 mb-1">{dict.sessions.seat_map.legend_title}</p>
             {[
-              { color: "text-muted-foreground/50", label: "Disponível" },
-              { color: "text-primary fill-primary", label: "Selecionado", fill: true },
-              { color: "text-amber-500/40", label: "Reservado" },
-              { color: "text-muted-foreground/20", label: "Ocupado" },
+              { color: "text-muted-foreground/50", label: dict.sessions.seat_map.available },
+              { color: "text-primary fill-primary", label: dict.sessions.seat_map.selected, fill: true },
+              { color: "text-amber-500/40", label: dict.sessions.seat_map.reserved },
+              { color: "text-muted-foreground/20", label: dict.sessions.seat_map.occupied },
             ].map(({ color, label, fill }) => (
               <div key={label} className="flex items-center gap-2">
                 <Armchair className={`w-3.5 h-3.5 ${color} ${fill ? "fill-primary" : ""}`} />
@@ -219,7 +225,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
 
           <div className="hidden md:flex items-center gap-1.5 bg-card/80 backdrop-blur-md border border-border/50 rounded-lg px-2.5 py-1.5 shadow pointer-events-none">
             <Info className="w-3 h-3 text-muted-foreground/60 shrink-0" />
-            <span className="text-[10px] text-muted-foreground/60">Arraste para navegar na sala</span>
+            <span className="text-[10px] text-muted-foreground/60">{dict.sessions.seat_map.drag_helper}</span>
           </div>
         </div>
 
@@ -230,7 +236,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
             {/* Left Section: Ticket Counter & Reset */}
             <div className="flex items-center justify-between sm:justify-start gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground font-medium">Qtd:</span>
+                <span className="text-xs text-muted-foreground font-medium">{dict.sessions.seat_map.qty}</span>
                 <div className="flex items-center gap-1 bg-card border border-border/80 rounded-full p-0.5">
                   <button
                     onClick={() => {
@@ -268,7 +274,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
                   title="Limpar seleção"
                 >
                   <RefreshCw className="w-3 h-3" />
-                  <span className="hidden sm:inline">Limpar</span>
+                  <span className="hidden sm:inline">{dict.sessions.seat_map.clear}</span>
                 </button>
               )}
             </div>
@@ -284,7 +290,9 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
                     exit={{ opacity: 0 }}
                     className="text-xs text-muted-foreground/60 italic"
                   >
-                    Selecione {ticketQuantity} {ticketQuantity === 1 ? "lugar" : "lugares"} no mapa
+                    {ticketQuantity === 1
+                      ? dict.sessions.seat_map.select_seats_prompt_one
+                      : dict.sessions.seat_map.select_seats_prompt_many.replace("{count}", String(ticketQuantity))}
                   </motion.p>
                 ) : (
                   Array.from(selected).map(seatId => {
@@ -311,7 +319,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
             <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/40">
               <div className="flex flex-col items-start sm:items-end">
                 <span className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-mono">
-                  Total (Simulação)
+                  {dict.sessions.seat_map.total_simulation}
                 </span>
                 <span className="font-black text-base font-mono text-foreground leading-none">
                   {formatPrice(totalPrice)}
@@ -329,7 +337,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
                 className="flex items-center gap-2 bg-primary text-primary-foreground font-bold text-xs sm:text-sm px-5 py-2.5 rounded-full shadow-lg shadow-primary/25 hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
               >
                 <Ticket className="w-4 h-4" />
-                <span>Continuar</span>
+                <span>{dict.sessions.seat_map.continue}</span>
                 {!allSelected && selected.size > 0 && (
                   <span className="text-[10px] opacity-80 font-normal">
                     ({selected.size}/{ticketQuantity})
@@ -347,6 +355,7 @@ export function SeatMap({ session, onConfirm }: SeatMapProps) {
         onOpenChange={setCheckoutOpen}
         session={session}
         seats={selectedSeats}
+        lang={lang}
       />
     </>
   );

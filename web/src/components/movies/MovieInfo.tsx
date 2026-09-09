@@ -3,12 +3,18 @@
 import { useState } from "react";
 import { Film, User, ChevronDown, ChevronUp } from "lucide-react";
 import { ApiMovieDetails } from "@/lib/features/movies";
+import { useParams } from "next/navigation";
+import { getDictionary } from "@/app/lib/dictionaries";
 
 interface MovieInfoProps {
   movie: ApiMovieDetails;
+  lang?: string;
 }
 
-export function MovieInfo({ movie }: MovieInfoProps) {
+export function MovieInfo({ movie, lang: propLang }: MovieInfoProps) {
+  const params = useParams();
+  const lang = propLang || (params?.lang as string) || "pt";
+  const dict = getDictionary(lang);
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
 
   return (
@@ -17,7 +23,7 @@ export function MovieInfo({ movie }: MovieInfoProps) {
       <section>
         <h2 className="text-lg font-display font-bold uppercase tracking-wider text-foreground mb-4 flex items-center gap-2">
           <span className="dotted-x w-8 text-foreground/30" aria-hidden />
-          Sinopse
+          {dict.movies.info.synopsis}
         </h2>
         <div className="relative">
           <p
@@ -34,11 +40,11 @@ export function MovieInfo({ movie }: MovieInfoProps) {
             >
               {synopsisExpanded ? (
                 <>
-                  Mostrar menos <ChevronUp className="h-3 w-3" />
+                  {dict.movies.info.show_less} <ChevronUp className="h-3 w-3" />
                 </>
               ) : (
                 <>
-                  Ler mais <ChevronDown className="h-3 w-3" />
+                  {dict.movies.info.read_more} <ChevronDown className="h-3 w-3" />
                 </>
               )}
             </button>
@@ -50,7 +56,7 @@ export function MovieInfo({ movie }: MovieInfoProps) {
       <section>
         <h2 className="text-lg font-display font-bold uppercase tracking-wider text-foreground mb-4 flex items-center gap-2">
           <span className="dotted-x w-8 text-foreground/30" aria-hidden />
-          Elenco & Equipa
+          {dict.movies.info.cast_crew}
         </h2>
 
         <div className="flex flex-col gap-4">
@@ -62,7 +68,7 @@ export function MovieInfo({ movie }: MovieInfoProps) {
               </div>
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                  Realizador
+                  {dict.movies.info.director}
                 </p>
                 <p className="text-sm font-semibold text-foreground">
                   {movie.director}
@@ -93,7 +99,7 @@ export function MovieInfo({ movie }: MovieInfoProps) {
         <section id="trailer">
           <h2 className="text-lg font-display font-bold uppercase tracking-wider text-foreground mb-4 flex items-center gap-2">
             <span className="dotted-x w-8 text-foreground/30" aria-hidden />
-            Trailer
+            {dict.movies.info.trailer}
           </h2>
           <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border bg-card">
             <iframe

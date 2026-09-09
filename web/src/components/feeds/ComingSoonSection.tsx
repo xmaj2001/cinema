@@ -11,6 +11,8 @@ import {
 import { ApiMovie } from "@/lib/features/movies";
 import { MovieCard } from "../movies/MovieCard";
 
+import { getDictionary } from "@/app/lib/dictionaries";
+
 interface ComingSoonSectionProps {
   lang?: string;
   movies: ApiMovie[];
@@ -20,6 +22,8 @@ export function ComingSoonSection({
   lang = "pt",
   movies,
 }: ComingSoonSectionProps) {
+  const dict = getDictionary(lang);
+
   return (
     <section className="border-t border-border/40">
       {/* Cabeçalho da Secção */}
@@ -27,14 +31,14 @@ export function ComingSoonSection({
         <div className="flex items-center gap-3">
           <span className="h-2 w-2 rounded-full bg-amber-500" />
           <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">
-            Em Breve
+            {dict.feeds.coming_soon}
           </h2>
         </div>
         <Link
           href={`/${lang}/movies?status=coming-soon`}
           className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
         >
-          Ver Todos
+          {dict.feeds.view_all}
         </Link>
       </div>
 

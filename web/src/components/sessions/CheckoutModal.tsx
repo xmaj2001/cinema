@@ -14,6 +14,9 @@ import { ApiSessionDetail, SessionSeat } from "@/lib/features/sessions";
 import { formatPrice } from "@/lib/utils";
 import { CinemaxTicket } from "./CinemaxTicket";
 
+import { useParams } from "next/navigation";
+import { getDictionary } from "@/app/lib/dictionaries";
+
 type CheckoutStep = "CONTACT" | "PAYMENT" | "PROCESSING" | "SUCCESS";
 
 interface CheckoutModalProps {
@@ -22,6 +25,7 @@ interface CheckoutModalProps {
   session: ApiSessionDetail;
   seats: SessionSeat[];
   randomlyAssigned?: boolean;
+  lang?: string;
 }
 
 export function CheckoutModal({
@@ -30,7 +34,12 @@ export function CheckoutModal({
   session,
   seats,
   randomlyAssigned = false,
+  lang: propLang,
 }: CheckoutModalProps) {
+  const params = useParams();
+  const lang = propLang || (params?.lang as string) || "pt";
+  const dict = getDictionary(lang);
+
   const [step, setStep] = useState<CheckoutStep>("CONTACT");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -66,10 +75,10 @@ export function CheckoutModal({
       <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
       <div>
         <p className="font-semibold text-amber-500 leading-tight">
-          Modo Demonstração (MVP)
+          {dict.sessions.checkout.mvp_title}
         </p>
         <p className="text-muted-foreground text-xs mt-0.5">
-          O sistema de pagamentos reais está indisponível nesta versão. Este fluxo é apenas uma **simulação de compra**.
+          {dict.sessions.checkout.mvp_desc}
         </p>
       </div>
     </div>
@@ -79,20 +88,16 @@ export function CheckoutModal({
   const renderRandomSeatBanner = () => {
     if (!randomlyAssigned || seats.length === 0) return null;
 
+    const seatLabels = seats.map((s) => `${s.row}${s.number}`).join(", ");
     return (
       <div className="flex items-start gap-3 rounded-xl bg-blue-500/10 border border-blue-500/20 px-4 py-3 text-sm">
         <span className="text-blue-400 mt-0.5 shrink-0">🎲</span>
         <div>
           <p className="font-semibold text-blue-400 leading-tight">
-            Lugar atribuído aleatoriamente
+            {dict.sessions.checkout.random_seat_title}
           </p>
           <p className="text-muted-foreground text-xs mt-0.5">
-            O sistema selecionou o lugar{" "}
-            <span className="font-bold text-foreground">
-              {seats.map((s) => `${s.row}${s.number}`).join(", ")}
-            </span>{" "}
-            para si. Preferes escolher manualmente? Fecha este ecrã e clica em
-            «Escolher Assentos».
+            {dict.sessions.checkout.random_seat_desc.replace("{seats}", seatLabels)}
           </p>
         </div>
       </div>
@@ -109,10 +114,10 @@ export function CheckoutModal({
     >
       <div className="flex flex-col gap-1 text-center">
         <Dialog.Title className="text-xl font-bold font-display text-foreground">
-          Identificação
+          {dict.sessions.checkout.contact_title}
         </Dialog.Title>
         <Dialog.Description className="text-sm text-muted-foreground">
-          Como pretende receber os seus bilhetes digitais?
+          {dict.sessions.checkout.contact_desc}
         </Dialog.Description>
       </div>
 
@@ -125,7 +130,7 @@ export function CheckoutModal({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Mail className="h-4 w-4" /> E-mail
+            <Mail className="h-4 w-4" /> {dict.sessions.checkout.email}
           </label>
           <input
             type="email"
@@ -133,7 +138,7 @@ export function CheckoutModal({
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="exemplo@email.com"
+            placeholder={dict.sessions.checkout.email_placeholder}
             className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
         </div>
@@ -141,14 +146,14 @@ export function CheckoutModal({
         <div className="relative flex items-center py-1">
           <div className="grow border-t border-border"></div>
           <span className="shrink-0 mx-4 text-xs text-muted-foreground font-mono uppercase tracking-widest">
-            Ou
+            {dict.sessions.checkout.or}
           </span>
           <div className="grow border-t border-border"></div>
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Phone className="h-4 w-4" /> WhatsApp
+            <Phone className="h-4 w-4" /> {dict.sessions.checkout.whatsapp}
           </label>
           <input
             type="tel"
@@ -156,7 +161,7 @@ export function CheckoutModal({
             autoComplete="tel"
             value={whatsapp}
             onChange={(e) => setWhatsapp(e.target.value)}
-            placeholder="+244 9XX XXX XXX"
+            placeholder={dict.sessions.checkout.whatsapp_placeholder}
             className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
         </div>
@@ -167,7 +172,7 @@ export function CheckoutModal({
         disabled={!isContactValid}
         className="mt-2 w-full rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 disabled:opacity-50 disabled:pointer-events-none"
       >
-        Continuar para Pagamento (Simulação)
+        {dict.sessions.checkout.continue_payment}
       </button>
     </form>
   );
@@ -181,14 +186,14 @@ export function CheckoutModal({
             onClick={() => setStep("CONTACT")}
             className="text-xs text-muted-foreground hover:text-foreground absolute left-6"
           >
-            ← Voltar
+            {dict.sessions.checkout.back}
           </button>
           <Dialog.Title className="text-xl font-bold font-display text-foreground">
-            Pagamento
+            {dict.sessions.checkout.payment_title}
           </Dialog.Title>
         </div>
         <Dialog.Description className="text-sm text-muted-foreground">
-          Escolha o seu método de pagamento preferido.
+          {dict.sessions.checkout.payment_desc}
         </Dialog.Description>
       </div>
 
@@ -214,7 +219,7 @@ export function CheckoutModal({
                   : "text-muted-foreground"
               }`}
             />
-            <span className="font-semibold text-sm">Multicaixa Express</span>
+            <span className="font-semibold text-sm">{dict.sessions.checkout.multicaixa_express}</span>
           </div>
           <input
             type="radio"
@@ -241,7 +246,7 @@ export function CheckoutModal({
                   : "text-muted-foreground"
               }`}
             />
-            <span className="font-semibold text-sm">Unitel Money</span>
+            <span className="font-semibold text-sm">{dict.sessions.checkout.unitel_money}</span>
           </div>
           <input
             type="radio"
@@ -257,13 +262,13 @@ export function CheckoutModal({
       <div className="rounded-xl bg-muted/50 p-4 flex flex-col gap-2">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">
-            {seats.length}x Bilhete(s)
+            {dict.sessions.checkout.tickets_count.replace("{count}", String(seats.length))}
           </span>
           <span className="font-mono">{`${formatPrice(totalPrice)}`}</span>
         </div>
         <div className="h-px w-full bg-border" />
         <div className="flex justify-between font-bold">
-          <span>Total a Simular</span>
+          <span>{dict.sessions.checkout.total_simulate}</span>
           <span className="font-mono text-primary">
             {`${formatPrice(totalPrice)}`}
           </span>
@@ -275,7 +280,7 @@ export function CheckoutModal({
         onClick={handleNext}
         className="mt-2 w-full rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110"
       >
-        Simular Pagamento
+        {dict.sessions.checkout.simulate_payment}
       </button>
     </div>
   );
@@ -285,10 +290,10 @@ export function CheckoutModal({
       <Loader2 className="h-16 w-16 animate-spin text-primary" />
       <div className="flex flex-col gap-2">
         <Dialog.Title className="text-xl font-bold font-display text-foreground">
-          A simular pagamento...
+          {dict.sessions.checkout.processing_title}
         </Dialog.Title>
         <Dialog.Description className="text-sm text-muted-foreground">
-          A gerar bilhete fictício para fins de teste.
+          {dict.sessions.checkout.processing_desc}
         </Dialog.Description>
       </div>
     </div>
@@ -302,6 +307,7 @@ export function CheckoutModal({
         email={email}
         whatsapp={whatsapp}
         paymentMethod={paymentMethod}
+        lang={lang}
       />
     </div>
   );

@@ -8,6 +8,8 @@ import { MovieCard } from "./MovieCard";
 import { Sparkles, Loader2, Filter, X, Film, Monitor } from "lucide-react";
 import { useInfiniteMovies } from "@/lib/features/movies/hooks/use-movies";
 
+import { getDictionary } from "@/app/lib/dictionaries";
+
 interface MoviesClientProps {
   lang: string;
   initialPage?: any;
@@ -27,6 +29,7 @@ function FilterSidebar({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dict = getDictionary(lang);
 
   const search = searchParams.get("search") || "";
   const urlStatus = searchParams.get("status") || "todos";
@@ -67,44 +70,28 @@ function FilterSidebar({
       >
         {/* Mobile close header */}
         <div className="flex items-center justify-between lg:hidden mb-4">
-          <span className="font-bold text-lg text-foreground">Filtros</span>
+          <span className="font-bold text-lg text-foreground">{dict.movies.list.filters}</span>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-2 bg-muted hover:bg-muted/80 transition-colors text-foreground"
-            aria-label="Fechar menu"
+            aria-label={dict.movies.list.close_menu}
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Search */}
-        {/* <section>
-          <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-            <Search className="h-4 w-4" /> Pesquisa
-          </h4>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Nome do filme..."
-              value={search}
-              onChange={(e) => updateParams("search", e.target.value)}
-              className="w-full h-11 rounded-xl border border-border/50 bg-background/60 pl-4 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-sm"
-            />
-          </div>
-        </section> */}
-
         {/* Status */}
         <section className="border-t pt-5 border-border/50">
           <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-            <Film className="h-4 w-4" /> Estado
+            <Film className="h-4 w-4" /> {dict.movies.list.status}
           </h4>
           <ul className="space-y-1">
             {[
-              { id: "todos", label: "Todos os Filmes" },
-              { id: "em-cartaz", label: "Em Cartaz" },
-              { id: "pre-venda", label: "Pré-Venda" },
-              { id: "brevemente", label: "Brevemente" },
+              { id: "todos", label: dict.movies.list.all_movies },
+              { id: "em-cartaz", label: dict.movies.list.now_showing },
+              { id: "pre-venda", label: dict.movies.list.pre_sale },
+              { id: "brevemente", label: dict.movies.list.coming_soon },
             ].map((tab) => {
               const isActive = urlStatus === tab.id;
               return (
@@ -131,7 +118,7 @@ function FilterSidebar({
         {/* Formato */}
         <section className="border-t pt-5 border-border/50">
           <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-            <Monitor className="h-4 w-4" /> Formato
+            <Monitor className="h-4 w-4" /> {dict.movies.list.format}
           </h4>
           <select
             value={format}
@@ -141,7 +128,7 @@ function FilterSidebar({
             }}
             className="w-full h-11 rounded-xl border border-border/50 bg-background/60 px-4 text-sm font-medium text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer appearance-none transition-all shadow-sm"
           >
-            <option value="todos">Qualquer Formato</option>
+            <option value="todos">{dict.movies.list.any_format}</option>
             <option value="VIP">VIP</option>
             <option value="IMAX">IMAX</option>
             <option value="3D">3D</option>
@@ -165,6 +152,7 @@ function InfiniteMoviesFeed({
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const dict = getDictionary(lang);
 
   const search = searchParams.get("search")?.toLowerCase() || "";
   const urlStatus = searchParams.get("status") || "todos";
@@ -227,16 +215,16 @@ function InfiniteMoviesFeed({
             <Sparkles className="h-8 w-8 text-muted-foreground animate-pulse" />
           </div>
           <h3 className="text-xl font-extrabold text-foreground tracking-tight">
-            Nenhum filme encontrado
+            {dict.movies.list.no_movies}
           </h3>
           <p className="text-sm text-muted-foreground mt-2 max-w-md">
-            Não encontramos resultados para os filtros selecionados.
+            {dict.movies.list.no_results_desc}
           </p>
           <button
             onClick={clearFilters}
             className="mt-6 px-6 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-foreground rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-md"
           >
-            Limpar Filtros
+            {dict.movies.list.clear_filters}
           </button>
         </div>
       ) : (
@@ -256,7 +244,7 @@ function InfiniteMoviesFeed({
 
       {!hasNextPage && moviesList.length > 0 && (
         <p className="py-8 text-center text-sm text-muted-foreground">
-          Você chegou ao fim do catálogo de filmes.
+          {dict.movies.list.end_of_catalog}
         </p>
       )}
     </div>

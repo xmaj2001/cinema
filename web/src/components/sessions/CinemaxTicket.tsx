@@ -4,6 +4,8 @@ import React, { useMemo } from "react";
 import { AlertCircle } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { ApiSessionDetail, SessionSeat } from "@/lib/features/sessions";
+import { useParams } from "next/navigation";
+import { getDictionary } from "@/app/lib/dictionaries";
 
 interface ExtendedSessionSeat extends SessionSeat {
   ticketCode?: string;
@@ -15,6 +17,7 @@ interface CinemaxTicketProps {
   email?: string;
   whatsapp?: string;
   paymentMethod?: string;
+  lang?: string;
 }
 
 export function CinemaxTicket({
@@ -23,28 +26,33 @@ export function CinemaxTicket({
   email,
   whatsapp,
   paymentMethod = "Multicaixa Express",
+  lang: propLang,
 }: CinemaxTicketProps) {
+  const params = useParams();
+  const lang = propLang || (params?.lang as string) || "pt";
+  const dict = getDictionary(lang);
+
   // Formatação de datas e valores
   const formattedDate = useMemo(() => {
     if (!session?.startTime) return "";
-    return new Date(session.startTime).toLocaleDateString("pt-PT", {
+    return new Date(session.startTime).toLocaleDateString(lang === "en" ? "en-US" : "pt-PT", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
-  }, [session?.startTime]);
+  }, [session?.startTime, lang]);
 
   const formattedTime = useMemo(() => {
     if (!session?.startTime) return "";
-    return new Date(session.startTime).toLocaleTimeString("pt-PT", {
+    return new Date(session.startTime).toLocaleTimeString(lang === "en" ? "en-US" : "pt-PT", {
       hour: "2-digit",
       minute: "2-digit",
     });
-  }, [session?.startTime]);
+  }, [session?.startTime, lang]);
 
   const formatPrice = (val: number): string => {
     if (typeof val !== "number") return "0 AKZ";
-    return new Intl.NumberFormat("pt-AO", {
+    return new Intl.NumberFormat(lang === "en" ? "en-US" : "pt-AO", {
       style: "currency",
       currency: "AOA",
       maximumFractionDigits: 0,
@@ -79,29 +87,31 @@ export function CinemaxTicket({
                   {session.room?.location?.name || "Cinemax"}
                 </p>
                 <p className="text-[10px] text-slate-500 uppercase font-sans mt-0.5">
-                  COMPROVATIVO DE ENTRADA ({index + 1}/{seats.length})
+                  {dict.sessions.ticket.entry_proof
+                    .replace("{current}", String(index + 1))
+                    .replace("{total}", String(seats.length))}
                 </p>
               </div>
 
               {/* Informações do Filme */}
               <div className="mb-4">
                 <span className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
-                  FILME:
+                  {dict.sessions.ticket.movie}
                 </span>
                 <h2 className="text-xl font-black leading-tight uppercase font-sans text-black mt-0.5">
                   {session.movie?.title}
                 </h2>
                 <div className="text-[11px] mt-1 space-x-1 text-slate-700 font-sans">
                   <span>
-                    CLASSIFICAÇÃO: <strong>{session.movie?.ageRating}</strong>
+                    {dict.sessions.ticket.rating} <strong>{session.movie?.ageRating}</strong>
                   </span>
                   <span>|</span>
                   <span>
-                    FORMATO: <strong>{session.room?.format}</strong>
+                    {dict.sessions.ticket.format} <strong>{session.room?.format}</strong>
                   </span>
                 </div>
                 <div className="text-[11px] text-slate-700 font-sans">
-                  DURAÇÃO: <strong>{session.movie?.durationMin} MIN</strong>
+                  {dict.sessions.ticket.duration} <strong>{session.movie?.durationMin} {dict.sessions.ticket.min}</strong>
                 </div>
               </div>
 
@@ -111,7 +121,7 @@ export function CinemaxTicket({
               <div className="grid grid-cols-2 gap-2 my-2 bg-slate-50 p-2 border border-slate-300 rounded">
                 <div>
                   <span className="text-[10px] font-bold text-slate-500 uppercase block">
-                    SALA:
+                    {dict.sessions.ticket.room}
                   </span>
                   <span className="text-2xl font-black text-black font-sans leading-none">
                     {session.room?.name}
@@ -119,7 +129,7 @@ export function CinemaxTicket({
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] font-bold text-slate-500 uppercase block">
-                    LUGAR:
+                    {dict.sessions.ticket.seat}
                   </span>
                   <span className="text-2xl font-black text-blue-900 font-sans leading-none">
                     {seatLabel}
@@ -130,23 +140,23 @@ export function CinemaxTicket({
               {/* Detalhes da Sessão */}
               <div className="space-y-1 my-3 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-600 uppercase">SESSÃO:</span>
+                  <span className="text-slate-600 uppercase">{dict.sessions.ticket.session}</span>
                   <span className="font-bold">{formattedTime}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 uppercase">DATA:</span>
+                  <span className="text-slate-600 uppercase">{dict.sessions.ticket.date}</span>
                   <span className="font-bold">{formattedDate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 uppercase">FILA:</span>
+                  <span className="text-slate-600 uppercase">{dict.sessions.ticket.row}</span>
                   <span className="font-bold">{seat.row}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 uppercase">NÚMERO ASSENTO:</span>
+                  <span className="text-slate-600 uppercase">{dict.sessions.ticket.seat_number}</span>
                   <span className="font-bold">{seat.number}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 uppercase">TIPO LUGAR:</span>
+                  <span className="text-slate-600 uppercase">{dict.sessions.ticket.seat_type}</span>
                   <span className="font-bold uppercase">{seat.type}</span>
                 </div>
               </div>
@@ -156,18 +166,18 @@ export function CinemaxTicket({
               {/* Pagamento */}
               <div className="space-y-1 text-xs my-3">
                 <div className="flex justify-between">
-                  <span className="text-slate-600 uppercase">PREÇO UNITÁRIO:</span>
+                  <span className="text-slate-600 uppercase">{dict.sessions.ticket.unit_price}</span>
                   <span className="font-bold text-sm">
                     {formatPrice(session.price)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 uppercase">PAGAMENTO:</span>
+                  <span className="text-slate-600 uppercase">{dict.sessions.ticket.payment}</span>
                   <span className="font-bold uppercase">{paymentMethod}</span>
                 </div>
                 {(email || whatsapp) && (
                   <div className="flex justify-between text-[10px] text-slate-500 pt-1">
-                    <span>CONTATO:</span>
+                    <span>{dict.sessions.ticket.contact}</span>
                     <span className="truncate max-w-[180px] font-sans">
                       {email || whatsapp}
                     </span>
@@ -209,12 +219,12 @@ export function CinemaxTicket({
                 </div>
 
                 <p className="text-[9px] text-center uppercase tracking-tight text-slate-500 font-sans">
-                  VÁLIDO APENAS PARA A DATA E HORA INDICADAS • CONSERVE ESTE BILHETE
+                  {dict.sessions.ticket.validity_notice}
                 </p>
               </div>
 
               <div className="mt-4 pt-2 border-t border-slate-200 text-center text-[9px] text-slate-400 font-sans">
-                Cinemax Angola • Todos os direitos reservados
+                {dict.sessions.ticket.rights}
               </div>
             </main>
           );

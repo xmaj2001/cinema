@@ -17,6 +17,8 @@ import { SessionType } from "@/lib/features/movies";
 import { formatPrice } from "@/lib/utils";
 import { useLocations } from "@/lib/features/locations/hooks/use-locations";
 
+import { getDictionary } from "@/app/lib/dictionaries";
+
 const FORMAT_LABELS: Record<string, string> = {
   D2: "2D",
   D3: "3D",
@@ -39,6 +41,7 @@ interface HeaderSessionProps {
 }
 
 export function HeaderSession({ session, lang }: HeaderSessionProps) {
+  const dict = getDictionary(lang);
   const { data: locations = [] } = useLocations();
   const locationDetails = locations.find(l => l.id === session.room.location.id);
 
@@ -49,11 +52,11 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
 
   const isSaleOpen = saleOpens <= now;
   const isStarted = startDate <= now;
-  const tierLabel: Record<string, string> = {
-    WEEKDAY: "Dia Útil",
-    WEEKEND: "Fim de Semana",
-    HOLIDAY: "Feriado",
-    STUDENT: "Estudante",
+  const tierLabels: Record<string, string> = {
+    WEEKDAY: dict.sessions.header.tiers.WEEKDAY,
+    WEEKEND: dict.sessions.header.tiers.WEEKEND,
+    HOLIDAY: dict.sessions.header.tiers.HOLIDAY,
+    STUDENT: dict.sessions.header.tiers.STUDENT,
   };
 
   const formatBadgeClass =
@@ -91,7 +94,7 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
                 {session.movie.title}
               </Link>
               <span>/</span>
-              <span className="text-foreground">Sessão</span>
+              <span className="text-foreground">{dict.sessions.header.session}</span>
             </div>
 
             {/* Badge de Formato */}
@@ -105,12 +108,12 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
 
               {session.type === SessionType.PREMIERE && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold border bg-amber-500/20 text-amber-400 border-amber-500/40">
-                  Pré-Estreia
+                  {dict.sessions.header.pre_premiere}
                 </span>
               )}
 
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold border bg-card/60 text-muted-foreground border-border/60">
-                {tierLabel[session.tier] || session.tier}
+                {tierLabels[session.tier] || session.tier}
               </span>
             </div>
 
@@ -120,7 +123,7 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
                 {session.movie.title}
               </h1>
               <p className="mt-2 text-lg sm:text-xl font-semibold text-muted-foreground">
-                {startDate.toLocaleDateString("pt-PT", {
+                {startDate.toLocaleDateString(lang === "en" ? "en-US" : "pt-PT", {
                   weekday: "long",
                   day: "numeric",
                   month: "long",
@@ -133,10 +136,10 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
             <div className="flex flex-wrap items-center gap-6 text-sm">
               <div className="flex flex-col">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">
-                  Início
+                  {dict.sessions.header.start}
                 </span>
                 <span className="text-xl font-bold font-mono text-foreground">
-                  {startDate.toLocaleTimeString("pt-PT", {
+                  {startDate.toLocaleTimeString(lang === "en" ? "en-US" : "pt-PT", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
@@ -145,10 +148,10 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
               <div className="w-px h-8 bg-border/60" />
               <div className="flex flex-col">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">
-                  Fim
+                  {dict.sessions.header.end}
                 </span>
                 <span className="text-xl font-bold font-mono text-foreground">
-                  {endDate.toLocaleTimeString("pt-PT", {
+                  {endDate.toLocaleTimeString(lang === "en" ? "en-US" : "pt-PT", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
@@ -157,7 +160,7 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
               <div className="w-px h-8 bg-border/60" />
               <div className="flex flex-col">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">
-                  Duração
+                  {dict.sessions.header.duration}
                 </span>
                 <span className="text-xl font-bold font-mono text-foreground">
                   {session.movie.durationMin} min
@@ -194,7 +197,7 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
               <span className="w-1 h-1 rounded-full bg-border" />
               <span className="flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5" />
-                {session.room.capacity} lugares
+                {session.room.capacity} {dict.sessions.header.seats_count}
               </span>
             </div>
 
@@ -203,7 +206,7 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
               {/* Preço */}
               <div className="flex flex-col">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                  Preço por Bilhete
+                  {dict.sessions.header.ticket_price}
                 </span>
                 <span className="text-2xl font-black font-mono text-foreground">
                   {formatPrice(session.price)}
@@ -219,7 +222,7 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:brightness-110 hover:scale-[1.03] active:scale-95"
                   >
                     <Ticket className="h-4 w-4" />
-                    Comprar Bilhete
+                    {dict.sessions.header.buy_ticket}
                   </Link>
 
                   {/* Choose Seats */}
@@ -228,15 +231,15 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
                     className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/60 backdrop-blur-md px-6 py-3 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:bg-card hover:scale-[1.02] active:scale-95"
                   >
                     <Shuffle className="h-4 w-4" />
-                    Escolher Assentos
+                    {dict.sessions.header.choose_seats}
                   </Link>
                 </div>
               )}
 
               {!isSaleOpen && (
                 <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-6 py-3 text-sm font-semibold text-muted-foreground">
-                  Venda abre{" "}
-                  {saleOpens.toLocaleDateString("pt-PT", {
+                  {dict.sessions.header.sale_opens}{" "}
+                  {saleOpens.toLocaleDateString(lang === "en" ? "en-US" : "pt-PT", {
                     day: "numeric",
                     month: "short",
                   })}
@@ -245,7 +248,7 @@ export function HeaderSession({ session, lang }: HeaderSessionProps) {
 
               {isStarted && (
                 <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-6 py-3 text-sm font-semibold text-muted-foreground">
-                  Sessão já iniciada
+                  {dict.sessions.header.session_started}
                 </div>
               )}
             </div>

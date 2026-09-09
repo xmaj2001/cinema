@@ -3,14 +3,20 @@
 import { useState } from "react";
 import { X, Bell, Mail, Phone, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useCreatePresaleSubscription } from "@/lib/features/presale-subscriptions/hooks/use-presale-subscription";
+import { useParams } from "next/navigation";
+import { getDictionary } from "@/app/lib/dictionaries";
 
 interface NotifyMeModalProps {
   movieId: string;
   movieTitle: string;
   onClose: () => void;
+  lang?: string;
 }
 
-export function NotifyMeModal({ movieId, movieTitle, onClose }: NotifyMeModalProps) {
+export function NotifyMeModal({ movieId, movieTitle, onClose, lang: propLang }: NotifyMeModalProps) {
+  const params = useParams();
+  const lang = propLang || (params?.lang as string) || "pt";
+  const dict = getDictionary(lang);
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
@@ -50,7 +56,7 @@ export function NotifyMeModal({ movieId, movieTitle, onClose }: NotifyMeModalPro
             </div>
             <div>
               <h2 className="text-base font-display font-bold uppercase tracking-wider text-foreground">
-                Avisar-me
+                {dict.movies.notify_modal.title}
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                 {movieTitle}
@@ -73,22 +79,22 @@ export function NotifyMeModal({ movieId, movieTitle, onClose }: NotifyMeModalPro
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 mb-4">
                 <CheckCircle2 className="h-8 w-8" />
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">Tudo certo!</h3>
+              <h3 className="text-lg font-bold text-foreground mb-2">{dict.movies.notify_modal.success_title}</h3>
               <p className="text-sm text-muted-foreground">
-                Avisaremos assim que a pré-venda de ingressos para <strong>{movieTitle}</strong> estiver disponível.
+                {dict.movies.notify_modal.success_message.replace("{movieTitle}", movieTitle)}
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="text-sm text-foreground/90 font-medium">
-                Onde você quer receber o aviso quando abrir a venda de bilhetes? (Preencha um ou ambos)
+                {dict.movies.notify_modal.prompt}
               </div>
 
               <div className="flex flex-col gap-4">
                 {/* Email Input */}
                 <div className="space-y-1.5">
                   <label htmlFor="email" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    E-mail
+                    {dict.movies.notify_modal.email}
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -97,29 +103,11 @@ export function NotifyMeModal({ movieId, movieTitle, onClose }: NotifyMeModalPro
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="exemplo@email.com"
+                      placeholder={dict.movies.notify_modal.email_placeholder}
                       className="w-full rounded-xl border border-border bg-background/60 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
                     />
                   </div>
                 </div>
-
-                {/* WhatsApp Input */}
-                {/* <div className="space-y-1.5">
-                  <label htmlFor="whatsapp" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    WhatsApp (Opcional)
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                      id="whatsapp"
-                      type="tel"
-                      value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
-                      placeholder="+244 9XX XXX XXX"
-                      className="w-full rounded-xl border border-border bg-background/60 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
-                    />
-                  </div>
-                </div> */}
               </div>
 
               {/* Mensagem de erro */}
@@ -137,7 +125,7 @@ export function NotifyMeModal({ movieId, movieTitle, onClose }: NotifyMeModalPro
                   disabled={isPending}
                   className="flex-1 rounded-full border border-border/60 bg-transparent px-4 py-2.5 text-sm font-bold text-muted-foreground transition hover:bg-muted"
                 >
-                  Cancelar
+                  {dict.movies.notify_modal.cancel}
                 </button>
                 <button
                   type="submit"
@@ -147,10 +135,10 @@ export function NotifyMeModal({ movieId, movieTitle, onClose }: NotifyMeModalPro
                   {isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Salvando...</span>
+                      <span>{dict.movies.notify_modal.saving}</span>
                     </>
                   ) : (
-                    <span>Confirmar</span>
+                    <span>{dict.movies.notify_modal.confirm}</span>
                   )}
                 </button>
               </div>
