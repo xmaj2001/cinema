@@ -223,7 +223,7 @@ function NavbarContent() {
 
         {/* Direita: Idioma, Tema e Ação Principal */}
         <div className="flex items-center gap-3 justify-end flex-1">
-          <ModeToggle />
+          {/* <ModeToggle /> */}
           <LanguageToggle />
 
           {/* Botão de Pesquisa (Mobile) */}

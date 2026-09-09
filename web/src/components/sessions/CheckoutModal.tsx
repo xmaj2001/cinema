@@ -5,16 +5,14 @@ import { Dialog } from "@base-ui/react";
 import {
   X,
   Loader2,
-  CheckCircle2,
-  Ticket as TicketIcon,
-  Download,
   CreditCard,
   Mail,
   Phone,
+  AlertTriangle,
 } from "lucide-react";
-import Image from "next/image";
 import { ApiSessionDetail, SessionSeat } from "@/lib/features/sessions";
 import { formatPrice } from "@/lib/utils";
+import { CinemaxTicket } from "./CinemaxTicket";
 
 type CheckoutStep = "CONTACT" | "PAYMENT" | "PROCESSING" | "SUCCESS";
 
@@ -42,7 +40,7 @@ export function CheckoutModal({
     if (step === "CONTACT") setStep("PAYMENT");
     else if (step === "PAYMENT") {
       setStep("PROCESSING");
-      setTimeout(() => setStep("SUCCESS"), 2500); // simulate 2.5s processing
+      setTimeout(() => setStep("SUCCESS"), 2500); // simula 2.5s de processamento
     }
   };
 
@@ -54,27 +52,62 @@ export function CheckoutModal({
   };
 
   const onOpenChangeHandler = (open: boolean) => {
-    if (!open && step === "PROCESSING") return; // Prevent closing while processing
+    if (!open && step === "PROCESSING") return; // Impede fechar durante o processamento
     onOpenChange(open);
-    if (!open) setTimeout(handleReset, 300); // reset after animation
-  };
-
-  const handlePrint = () => {
-    window.print();
+    if (!open) setTimeout(handleReset, 300); // reseta após a animação
   };
 
   const totalPrice = seats.length * session.price;
   const isContactValid = email.trim() !== "" || whatsapp.trim() !== "";
 
+  // Banner de Aviso sobre o Modo de Simulação (MVP)
+  const renderMvpSimulationBanner = () => (
+    <div className="flex items-start gap-3 rounded-xl bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm">
+      <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+      <div>
+        <p className="font-semibold text-amber-500 leading-tight">
+          Modo Demonstração (MVP)
+        </p>
+        <p className="text-muted-foreground text-xs mt-0.5">
+          O sistema de pagamentos reais está indisponível nesta versão. Este fluxo é apenas uma **simulação de compra**.
+        </p>
+      </div>
+    </div>
+  );
+
+  // Banner de lugar atribuído aleatoriamente
+  const renderRandomSeatBanner = () => {
+    if (!randomlyAssigned || seats.length === 0) return null;
+
+    return (
+      <div className="flex items-start gap-3 rounded-xl bg-blue-500/10 border border-blue-500/20 px-4 py-3 text-sm">
+        <span className="text-blue-400 mt-0.5 shrink-0">🎲</span>
+        <div>
+          <p className="font-semibold text-blue-400 leading-tight">
+            Lugar atribuído aleatoriamente
+          </p>
+          <p className="text-muted-foreground text-xs mt-0.5">
+            O sistema selecionou o lugar{" "}
+            <span className="font-bold text-foreground">
+              {seats.map((s) => `${s.row}${s.number}`).join(", ")}
+            </span>{" "}
+            para si. Preferes escolher manualmente? Fecha este ecrã e clica em
+            «Escolher Assentos».
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   const renderContactStep = () => (
-    <form 
-      className="flex flex-col gap-6 p-6"
+    <form
+      className="flex flex-col gap-5 p-6"
       onSubmit={(e) => {
         e.preventDefault();
         if (isContactValid) handleNext();
       }}
     >
-      <div className="flex flex-col gap-2 text-center">
+      <div className="flex flex-col gap-1 text-center">
         <Dialog.Title className="text-xl font-bold font-display text-foreground">
           Identificação
         </Dialog.Title>
@@ -83,22 +116,11 @@ export function CheckoutModal({
         </Dialog.Description>
       </div>
 
-      {/* Randomly assigned seat banner */}
-      {randomlyAssigned && seats.length > 0 && (
-        <div className="flex items-start gap-3 rounded-xl bg-blue-500/10 border border-blue-500/20 px-4 py-3 text-sm">
-          <span className="text-blue-400 mt-0.5 shrink-0">🎲</span>
-          <div>
-            <p className="font-semibold text-blue-400 leading-tight">Lugar atribuído aleatoriamente</p>
-            <p className="text-muted-foreground text-xs mt-0.5">
-              O sistema selecionou o lugar{" "}
-              <span className="font-bold text-foreground">
-                {seats.map(s => `${s.row}${s.number}`).join(", ")}
-              </span>{" "}
-              para si. Preferes escolher manualmente? Fecha este ecrã e clica em «Escolher Assentos».
-            </p>
-          </div>
-        </div>
-      )}
+      {/* AVISO MVP DE SIMULAÇÃO */}
+      {renderMvpSimulationBanner()}
+
+      {/* Banner de lugar atribuído aleatoriamente */}
+      {renderRandomSeatBanner()}
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
@@ -116,7 +138,7 @@ export function CheckoutModal({
           />
         </div>
 
-        <div className="relative flex items-center py-2">
+        <div className="relative flex items-center py-1">
           <div className="grow border-t border-border"></div>
           <span className="shrink-0 mx-4 text-xs text-muted-foreground font-mono uppercase tracking-widest">
             Ou
@@ -145,16 +167,17 @@ export function CheckoutModal({
         disabled={!isContactValid}
         className="mt-2 w-full rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 disabled:opacity-50 disabled:pointer-events-none"
       >
-        Continuar para Pagamento
+        Continuar para Pagamento (Simulação)
       </button>
     </form>
   );
 
   const renderPaymentStep = () => (
-    <div className="flex flex-col gap-6 p-6">
-      <div className="flex flex-col gap-2 text-center">
+    <div className="flex flex-col gap-5 p-6">
+      <div className="flex flex-col gap-1 text-center">
         <div className="flex items-center justify-center mb-2">
           <button
+            type="button"
             onClick={() => setStep("CONTACT")}
             className="text-xs text-muted-foreground hover:text-foreground absolute left-6"
           >
@@ -168,6 +191,12 @@ export function CheckoutModal({
           Escolha o seu método de pagamento preferido.
         </Dialog.Description>
       </div>
+
+      {/* AVISO MVP DE SIMULAÇÃO */}
+      {renderMvpSimulationBanner()}
+
+      {/* Banner de lugar atribuído aleatoriamente */}
+      {renderRandomSeatBanner()}
 
       <div className="flex flex-col gap-3">
         <label
@@ -230,13 +259,11 @@ export function CheckoutModal({
           <span className="text-muted-foreground">
             {seats.length}x Bilhete(s)
           </span>
-          <span className="font-mono">
-            {`${formatPrice(totalPrice)}`}
-          </span>
+          <span className="font-mono">{`${formatPrice(totalPrice)}`}</span>
         </div>
         <div className="h-px w-full bg-border" />
         <div className="flex justify-between font-bold">
-          <span>Total a Pagar</span>
+          <span>Total a Simular</span>
           <span className="font-mono text-primary">
             {`${formatPrice(totalPrice)}`}
           </span>
@@ -244,10 +271,11 @@ export function CheckoutModal({
       </div>
 
       <button
+        type="button"
         onClick={handleNext}
         className="mt-2 w-full rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110"
       >
-        Confirmar Pagamento
+        Simular Pagamento
       </button>
     </div>
   );
@@ -257,103 +285,24 @@ export function CheckoutModal({
       <Loader2 className="h-16 w-16 animate-spin text-primary" />
       <div className="flex flex-col gap-2">
         <Dialog.Title className="text-xl font-bold font-display text-foreground">
-          A processar...
+          A simular pagamento...
         </Dialog.Title>
         <Dialog.Description className="text-sm text-muted-foreground">
-          Por favor, valide o pagamento na sua aplicação bancária.
+          A gerar bilhete fictício para fins de teste.
         </Dialog.Description>
       </div>
     </div>
   );
 
   const renderSuccessStep = () => (
-    <div className="flex flex-col gap-6 p-6 items-center">
-      <div className="flex flex-col items-center gap-3 text-center mb-2">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500">
-          <CheckCircle2 className="h-6 w-6" />
-        </div>
-        <div>
-          <Dialog.Title className="text-2xl font-bold font-display text-foreground">
-            Compra Concluída!
-          </Dialog.Title>
-          <Dialog.Description className="text-sm text-muted-foreground mt-1">
-            Os seus bilhetes foram enviados para{" "}
-            <span className="font-semibold text-foreground">
-              {email || whatsapp}
-            </span>
-            .
-          </Dialog.Description>
-        </div>
-      </div>
-
-      {/* Ticket Mockup */}
-      <div className="relative w-full overflow-hidden rounded-2xl border-2 border-border/60 bg-linear-to-br from-card to-background shadow-2xl">
-        {/* Tear holes */}
-        <div className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background border-r-2 border-border/60" />
-        <div className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background border-l-2 border-border/60" />
-
-        <div className="flex border-b-2 border-dashed border-border/60 p-5">
-          <div className="relative h-24 w-16 overflow-hidden rounded-md shrink-0">
-            <Image
-              src={session.movie.posterUrl}
-              alt={session.movie.title}
-              fill
-              className="object-cover"
-            />
-          </div>
-          <div className="ml-4 flex flex-col justify-center">
-            <h4 className="font-display text-lg font-black leading-tight line-clamp-2">
-              {session.movie.title}
-            </h4>
-            <p className="mt-1 text-xs font-mono text-muted-foreground">
-              {session.room.location.name} • {session.room.name}
-            </p>
-          </div>
-        </div>
-
-        <div className="p-5 flex justify-between items-center bg-card/40">
-          <div className="flex flex-col gap-3">
-            <div>
-              <p className="text-[10px] uppercase font-mono tracking-widest text-muted-foreground">
-                Data & Hora
-              </p>
-              <p className="font-bold text-sm">
-                {new Date(session.startTime).toLocaleString("pt-PT", {
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase font-mono tracking-widest text-muted-foreground">
-                Lugares
-              </p>
-              <p className="font-bold text-sm text-primary">
-                {seats.map((s) => `${s.row}${s.number}`).join(", ")}
-              </p>
-            </div>
-          </div>
-          
-          {/* Mock QR Code */}
-          <div className="flex h-20 w-20 items-center justify-center bg-white rounded-lg p-1">
-            <div className="w-full h-full bg-[url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=MockTicket123')] bg-cover" />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex w-full gap-3 mt-2">
-        <button
-          onClick={handlePrint}
-          className="flex-1 flex items-center justify-center gap-2 rounded-full border border-border bg-card py-2.5 text-sm font-semibold transition-all hover:bg-muted"
-        >
-          <Download className="h-4 w-4" /> Guardar PDF
-        </button>
-        <Dialog.Close className="flex-1 rounded-full bg-foreground py-2.5 text-sm font-bold text-background transition-all hover:bg-foreground/90">
-          Fechar
-        </Dialog.Close>
-      </div>
+    <div className="flex flex-col gap-4 p-4 items-center max-h-[85vh] overflow-y-auto">
+      <CinemaxTicket
+        session={session}
+        seats={seats}
+        email={email}
+        whatsapp={whatsapp}
+        paymentMethod={paymentMethod}
+      />
     </div>
   );
 
